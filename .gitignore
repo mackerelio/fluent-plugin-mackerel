@@ -17,3 +17,4 @@ test/version_tmp
 tmp
 .idea
 vendor/bundle
+test_out_mackerel_send.rb
