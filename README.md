@@ -1,29 +1,69 @@
-# Fluent::Plugin::Mackerel
+# fluent-plugin-mackerel
 
-TODO: Write a gem description
+## Overview
+
+[Fluentd](http://fluentd.org) plugin to send metrics to [mackerel](http://mackerel.io/).
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Install with gem or fluent-gem command as:
 
-    gem 'fluent-plugin-mackerel'
+```
+# for fluentd
+$ gem install fluent-plugin-typetalk
 
-And then execute:
+# for td-agent
+$ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-typetalk
+```
 
-    $ bundle
+## Configuration
 
-Or install it yourself as:
+### Usage
 
-    $ gem install fluent-plugin-mackerel
+This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of mackerel.io.
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  hostid xyz
+  metrics_prefix http_status
+  out_keys 2xx_count,3xx_count,4xx_count,5xx_count
+</match>
+```
 
-## Usage
+Then the sent metric data will look like this:
+```
+{
+  "hostId": "xyz",
+  "name": "http_status.2xx_count",
+  "time": 1399997498,
+  "value": 100.0
+}
+```
+As shown above, metric name will be a concatenation of metrics_prefix and out_keys values.
 
-TODO: Write usage instructions here
+## TODO
 
-## Contributing
+Pull requests are very welcome!!
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+## For developers
+
+You have to run the command below when starting development.
+```
+$ bundle install --path vendor/bundle
+```
+
+To run tests, do the following.
+```
+$ VERBOSE=1 bundle exec rake test
+```
+
+When releasing, call rake release as follows.
+```
+$ bundle exec rake release
+```
+
+## Copyright
+
+* Copyright (c) 2014- Takashi Someda ([@tksmd](http://twitter.com/tksmd/))
+* Apache License, Version 2.0
