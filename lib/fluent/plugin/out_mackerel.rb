@@ -8,8 +8,6 @@ module Fluent
     config_param :metrics_prefix, :string
     config_param :out_keys, :string
 
-    config_param :flush_interval, :time, :default => 1
-
     attr_reader :mackerel
 
     # Define `log` method for v0.10.42 or earlier
@@ -26,6 +24,11 @@ module Fluent
 
       @mackerel = Mackerel.new(conf['api_key'])
       @out_keys = @out_keys.split(',')
+
+      if @flush_interval < 60
+        log.info("flush_interval less than 60s is not allowed and overwriteen to 60s")
+        @flush_interval = 60
+      end
 
       if @hostid.nil? and @hostid_path.nil?
         raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' must be specifed."
@@ -63,12 +66,12 @@ module Fluent
       end
 
       begin
-        @mackerel.post_metrics(metrics)
+        @mackerel.post_metrics(metrics) unless metrics.empty?
       rescue => e
         log.error("out_mackerel:", :error_class => e.class, :error => e.message)
       end
+      metrics.clear
     end
-
   end
 
   class Mackerel
@@ -85,6 +88,9 @@ module Fluent
     end
 
     def post_metrics(metrics)
+
+      wait_for_minute
+
       req = Net::HTTP::Post.new('/api/v0/tsdb', initheader = {
         'X-Api-Key' => @api_key,
         'Content-Type' =>'application/json',
@@ -100,6 +106,14 @@ module Fluent
       unless res and res.is_a?(Net::HTTPSuccess)
         raise MackerelError, "failed to post, code: #{res.code}"
       end
+    end
+
+    def wait_for_minute
+      # limit request once per minute
+      wait_secs = @last_posted ? @last_posted + 60 - Time.now.to_i : 0
+      sleep wait_secs if wait_secs > 0
+      @last_posted = Time.now.to_i
+      wait_secs > 0
     end
 
   end
