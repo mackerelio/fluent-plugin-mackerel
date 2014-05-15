@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Fluentd](http://fluentd.org) plugin to send metrics to [mackerel](http://mackerel.io/).
+[Fluentd](http://fluentd.org) plugin to send metrics to [mackerel.io](http://mackerel.io/).
 
 ## Installation
 
@@ -40,7 +40,9 @@ Then the sent metric data will look like this:
   "value": 100.0
 }
 ```
-As shown above, metric name will be a concatenation of metrics_prefix and out_keys values.
+As shown above, metric name will be a concatenation of `metrics_prefix` and `out_keys` values.
+
+`flush_interval` is not allowed to set less than 60 secs not to send API requests more than once in a minute.
 
 ## TODO
 
