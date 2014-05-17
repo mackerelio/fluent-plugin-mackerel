@@ -7,6 +7,7 @@ module Fluent
     config_param :api_key, :string
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
+    config_param :hostid_tag_regexp, :string, :default => nil
     config_param :metrics_prefix, :string
     config_param :out_keys, :string
 
@@ -32,8 +33,8 @@ module Fluent
         @flush_interval = 60
       end
 
-      if @hostid.nil? and @hostid_path.nil?
-        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' must be specifed."
+      if @hostid.nil? and @hostid_path.nil? and @hostid_tag_regexp.nil?
+        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' or 'hostid_tag_regexp' must be specifed."
       end
 
       unless @hostid_path.nil?
@@ -59,7 +60,7 @@ module Fluent
       chunk.msgpack_each do |(tag,time,record)|
         out_keys.map do |key|
           metrics << {
-            'hostId' => @hostid,
+            'hostId' => @hostid || tag.match(@hostid_tag_regexp)[1],
             'value' => record[key].to_f,
             'time' => time,
             'name' => "%s.%s" % [@metrics_prefix, key]
