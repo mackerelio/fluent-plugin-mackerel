@@ -1,3 +1,5 @@
+require 'mackerel/client'
+
 module Fluent
   class MackerelOutput < Fluent::BufferedOutput
     Fluent::Plugin.register_output('mackerel', self)
@@ -22,7 +24,7 @@ module Fluent
     def configure(conf)
       super
 
-      @mackerel = Mackerel.new(conf['api_key'])
+      @mackerel = Mackerel::Client.new(:mackerel_api_key => conf['api_key'])
       @out_keys = @out_keys.split(',')
 
       if @flush_interval < 60
@@ -73,51 +75,5 @@ module Fluent
       metrics.clear
     end
   end
-
-  class Mackerel
-
-    USER_AGENT = "fluent-plugin-mackerel Ruby/#{RUBY_VERSION}"
-
-    def initialize(api_key)
-      require 'net/http'
-      require 'json'
-
-      @api_key = api_key
-      @http = Net::HTTP.new('mackerel.io', 443)
-      @http.use_ssl = true
-    end
-
-    def post_metrics(metrics)
-
-      wait_for_minute
-
-      req = Net::HTTP::Post.new('/api/v0/tsdb', initheader = {
-        'X-Api-Key' => @api_key,
-        'Content-Type' =>'application/json',
-        'User-Agent' => USER_AGENT
-      })
-      req.body = metrics.to_json
-      res = @http.request(req)
-
-      if res.is_a?(Net::HTTPUnauthorized)
-        raise MackerelError, "invalid api key used. check api_key in your configuration."
-      end
-
-      unless res and res.is_a?(Net::HTTPSuccess)
-        raise MackerelError, "failed to post, code: #{res.code}"
-      end
-    end
-
-    def wait_for_minute
-      # limit request once per minute
-      wait_secs = @last_posted ? @last_posted + 60 - Time.now.to_i : 0
-      sleep wait_secs if wait_secs > 0
-      @last_posted = Time.now.to_i
-      wait_secs > 0
-    end
-
-  end
-
-  class MackerelError < RuntimeError; end
 
 end
