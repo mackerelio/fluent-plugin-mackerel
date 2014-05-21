@@ -9,6 +9,7 @@ module Fluent
     config_param :hostid_path, :string, :default => nil
     config_param :hostid_tag_regexp, :string, :default => nil
     config_param :metrics_prefix, :string
+    config_param :metrics_tag_regexp, :string, :default => nil
     config_param :out_keys, :string
 
     attr_reader :mackerel
@@ -58,12 +59,16 @@ module Fluent
     def write(chunk)
       metrics = []
       chunk.msgpack_each do |(tag,time,record)|
+
+        metrics_prefix = @metrics_tag_regexp.nil? ?
+          @metrics_prefix : [@metrics_prefix, tag.match(@metrics_tag_regexp)[1]].join('.')
+
         out_keys.map do |key|
           metrics << {
             'hostId' => @hostid || tag.match(@hostid_tag_regexp)[1],
             'value' => record[key].to_f,
             'time' => time,
-            'name' => "%s.%s" % [@metrics_prefix, key]
+            'name' => "%s.%s" % [metrics_prefix, key]
           }
         end
       end
