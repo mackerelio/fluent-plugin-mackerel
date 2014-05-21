@@ -3,7 +3,7 @@ module Fluent
   class MackerelHostidTagOutput < Fluent::Output
     Fluent::Plugin.register_output('mackerel_hostid_tag', self)
 
-    config_param :hostid_path, :string, :default => '/var/lib/mackerel/id'
+    config_param :hostid_path, :string, :default => '/var/lib/mackerel-agent/id'
     config_param :add_to, :string
     config_param :key_name, :default => nil
 
