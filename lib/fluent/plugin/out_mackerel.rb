@@ -68,7 +68,7 @@ module Fluent
             'hostId' => @hostid || tag.match(@hostid_tag_regexp)[1],
             'value' => record[key].to_f,
             'time' => time,
-            'name' => "%s.%s" % [metrics_prefix, key]
+            'name' => "%s.%s.%s" % ['custom', metrics_prefix, key]
           }
         end
       end
