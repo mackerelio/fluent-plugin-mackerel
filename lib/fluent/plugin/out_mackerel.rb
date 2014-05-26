@@ -5,8 +5,13 @@ module Fluent
     config_param :api_key, :string
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
-    config_param :metrics_prefix, :string
     config_param :out_keys, :string
+
+    config_param :metrics_prefix do |val|
+      val.chomp!(".")
+      raise Fluent::ConfigError, "metrics_prefix is not allowed to be blank" if val.empty?
+      val.start_with?("custom.") ? val : "custom." << val
+    end
 
     attr_reader :mackerel
 
@@ -38,6 +43,7 @@ module Fluent
         @hostid = File.open(@hostid_path).read
       end
 
+      log.info("metrics_prefix is configured to #{@metrics_prefix}")
     end
 
     def start
@@ -110,9 +116,9 @@ module Fluent
 
     def wait_for_minute
       # limit request once per minute
-      wait_secs = @last_posted ? @last_posted + 60 - Time.now.to_i : 0
+      wait_secs = @last_posted ? @last_posted + 60 - Fluent::Engine.now : 0
       sleep wait_secs if wait_secs > 0
-      @last_posted = Time.now.to_i
+      @last_posted = Fluent::Engine.now
       wait_secs > 0
     end
 
