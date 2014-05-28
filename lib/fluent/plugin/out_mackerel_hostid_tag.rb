@@ -6,8 +6,8 @@ module Fluent
     config_param :hostid_path, :string, :default => '/var/lib/mackerel-agent/id'
     config_param :add_to, :string
     config_param :key_name, :default => nil
-    config_param :add_prefix, :string
-    config_param :remove_prefix, :string
+    config_param :add_prefix, :string, :default => nil
+    config_param :remove_prefix, :string, :default => nil
 
     # Define `log` method for v0.10.42 or earlier
     unless method_defined?(:log)
