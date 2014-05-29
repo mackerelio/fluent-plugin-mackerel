@@ -8,8 +8,7 @@ module Fluent
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
     config_param :hostid_tag_regexp, :string, :default => nil
-    config_param :metrics_prefix, :string
-    config_param :metrics_tag_regexp, :string, :default => nil
+    config_param :metrics_name, :string, :default => nil
     config_param :out_keys, :string
 
     attr_reader :mackerel
@@ -42,6 +41,21 @@ module Fluent
         @hostid = File.open(@hostid_path).read
       end
 
+      if @metrics_name
+        @name_processor = @metrics_name.split('.').map{ |token|
+          if token.start_with?('$')
+            token = token[2..-1]
+            if token == 'out_key'
+              Proc.new{ |args| args[:out_key] }
+            else
+              idx = token.match(/\[(-?\d+)\]/)[1].to_i
+              Proc.new{ |args| args[:tokens][idx] }
+            end
+          else
+            Proc.new{ token }
+          end
+        }
+      end
     end
 
     def start
@@ -60,15 +74,17 @@ module Fluent
       metrics = []
       chunk.msgpack_each do |(tag,time,record)|
 
-        metrics_prefix = @metrics_tag_regexp.nil? ?
-          @metrics_prefix : [@metrics_prefix, tag.match(@metrics_tag_regexp)[1]].join('.')
+        tokens = tag.split('.')
+        name = @name_processor.nil?
+          ? key
+          : @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
         out_keys.map do |key|
           metrics << {
             'hostId' => @hostid || tag.match(@hostid_tag_regexp)[1],
             'value' => record[key].to_f,
             'time' => time,
-            'name' => "%s.%s.%s" % ['custom', metrics_prefix, key]
+            'name' => "%s.%s" % ['custom', name]
           }
         end
       end
