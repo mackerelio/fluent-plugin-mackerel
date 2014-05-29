@@ -75,9 +75,8 @@ module Fluent
       chunk.msgpack_each do |(tag,time,record)|
 
         tokens = tag.split('.')
-        name = @name_processor.nil?
-          ? key
-          : @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
+        name = @name_processor.nil? ? key :
+          @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
         out_keys.map do |key|
           metrics << {
