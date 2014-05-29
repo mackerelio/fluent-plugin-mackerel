@@ -44,7 +44,7 @@ module Fluent
       if @metrics_name
         @name_processor = @metrics_name.split('.').map{ |token|
           if token.start_with?('$')
-            token = token[2..-1]
+            token = token[2..-2]
             if token == 'out_key'
               Proc.new{ |args| args[:out_key] }
             else
