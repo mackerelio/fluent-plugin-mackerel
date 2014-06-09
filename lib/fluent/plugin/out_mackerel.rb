@@ -41,7 +41,7 @@ module Fluent
       end
 
       if matched = @hostid.match(/^\${tag_parts\[(\d+)\]}$/)
-        idx = matched[1]
+        idx = matched[1].to_i
         @hostid_processor = Proc.new{ |args| args[:tokens][idx] }
       else
         @hostid_processor = Proc.new{ @hostid }
