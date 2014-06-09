@@ -7,6 +7,7 @@ module Fluent
     config_param :api_key, :string
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
+    config_param :service, :string, :default => nil
     config_param :metrics_name, :string, :default => nil
     config_param :out_keys, :string
 
@@ -32,19 +33,25 @@ module Fluent
         @flush_interval = 60
       end
 
-      if @hostid.nil? and @hostid_path.nil?
-        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' must be specifed."
-      end
-
       unless @hostid_path.nil?
         @hostid = File.open(@hostid_path).read
       end
 
-      if matched = @hostid.match(/^\${tag_parts\[(\d+)\]}$/)
-        hostid_idx = matched[1].to_i
-        @hostid_processor = Proc.new{ |args| args[:tokens][hostid_idx] }
-      else
-        @hostid_processor = Proc.new{ @hostid }
+      if @hostid.nil? and @service.nil?
+        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' or 'service' must be specifed."
+      end
+
+      if @hostid and @service
+        raise Fluent::ConfigError, "Niether 'hostid' and 'service' cannot be specifed."
+      end
+
+      unless @hostid.nil?
+        if matched = @hostid.match(/^\${tag_parts\[(\d+)\]}$/)
+          hostid_idx = matched[1].to_i
+          @hostid_processor = Proc.new{ |args| args[:tokens][hostid_idx] }
+        else
+          @hostid_processor = Proc.new{ @hostid }
+        end
       end
 
       if @metrics_name
@@ -85,17 +92,25 @@ module Fluent
           name = @name_processor.nil? ? key :
             @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
-          metrics << {
-            'hostId' => @hostid_processor.call(:tokens => tokens),
+          metric = {
             'value' => record[key].to_f,
             'time' => time,
             'name' => "%s.%s" % ['custom', name]
           }
+          metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
+
+          metrics << metric
         end
       end
 
       begin
-        @mackerel.post_metrics(metrics) unless metrics.empty?
+        unless metrics.empty?
+          if @hostid
+            @mackerel.post_metrics(metrics)
+          else
+            @mackerel.post_service_metrics(@service, metrics)
+          end
+        end
       rescue => e
         log.error("out_mackerel:", :error_class => e.class, :error => e.message)
       end
