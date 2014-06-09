@@ -7,7 +7,6 @@ module Fluent
     config_param :api_key, :string
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
-    config_param :hostid_tag_regexp, :string, :default => nil
     config_param :metrics_name, :string, :default => nil
     config_param :out_keys, :string
 
@@ -33,12 +32,19 @@ module Fluent
         @flush_interval = 60
       end
 
-      if @hostid.nil? and @hostid_path.nil? and @hostid_tag_regexp.nil?
-        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' or 'hostid_tag_regexp' must be specifed."
+      if @hostid.nil? and @hostid_path.nil?
+        raise Fluent::ConfigError, "Either 'hostid' or 'hostid_path' must be specifed."
       end
 
       unless @hostid_path.nil?
         @hostid = File.open(@hostid_path).read
+      end
+
+      if matched = @hostid.match(/^\${tag_parts\[(\d+)\]}$/)
+        idx = matched[1]
+        @hostid_processor = Proc.new{ |args| args[:tokens][idx] }
+      else
+        @hostid_processor = Proc.new{ @hostid }
       end
 
       if @metrics_name
@@ -80,7 +86,7 @@ module Fluent
             @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
           metrics << {
-            'hostId' => @hostid || tag.match(@hostid_tag_regexp)[1],
+            'hostId' => @hostid_processor.call(:tokens => tokens),
             'value' => record[key].to_f,
             'time' => time,
             'name' => "%s.%s" % ['custom', name]
