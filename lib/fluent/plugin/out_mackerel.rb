@@ -104,11 +104,15 @@ module Fluent
       end
 
       begin
-        unless metrics.empty?
+        while true
+          partial = metrics.slice!(0, 100)
+          if partial.empty?
+            break
+          end
           if @hostid
-            @mackerel.post_metrics(metrics)
+            @mackerel.post_metrics(partial)
           else
-            @mackerel.post_service_metrics(@service, metrics)
+            @mackerel.post_service_metrics(@service, partial)
           end
         end
       rescue => e
