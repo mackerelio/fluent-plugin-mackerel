@@ -10,14 +10,14 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     hostid xyz
-    metrics_prefix custom.service
+    metrics_name service.{out_keys}
     out_keys val1,val2,val3
   ]
 
   CONFIG_NOHOST = %[
     type mackerel
     api_key 123456
-    metrics_prefix service
+    metrics_name service.{out_keys}
     out_keys val1,val2,val3
   ]
 
@@ -32,16 +32,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     hostid xyz
-    metrics_prefix custom.service
-    out_keys val1,val2,val3
-    flush_interval 1s
-  ]
-
-  CONFIG_NOT_INSUFFICIENT_PREFIX = %[
-    type mackerel
-    api_key 123456
-    hostid xyz
-    metrics_prefix service
+    metrics_name service.{out_keys}
     out_keys val1,val2,val3
     flush_interval 1s
   ]
@@ -67,13 +58,10 @@ class MackerelOutputTest < Test::Unit::TestCase
     d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
 
-    d = create_driver(CONFIG_NOT_INSUFFICIENT_PREFIX)
-    assert_equal d.instance.instance_variable_get(:@metrics_prefix), "custom.service"
-
     d = create_driver()
     assert_equal d.instance.instance_variable_get(:@api_key), '123456'
     assert_equal d.instance.instance_variable_get(:@hostid), 'xyz'
-    assert_equal d.instance.instance_variable_get(:@metrics_prefix), 'custom.service'
+    assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.{out_keys}'
     assert_equal d.instance.instance_variable_get(:@out_keys), ['val1','val2','val3']
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
   end
@@ -94,15 +82,6 @@ class MackerelOutputTest < Test::Unit::TestCase
     d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
     d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
     d.run()
-  end
-
-  def test_wait_for_minute
-    d = create_driver()
-    mackerel = d.instance.mackerel
-    assert_equal mackerel.wait_for_minute, false
-    assert_equal mackerel.wait_for_minute, true
-    sleep 60
-    assert_equal mackerel.wait_for_minute, false
   end
 
 end
