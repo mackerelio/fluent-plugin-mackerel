@@ -29,7 +29,7 @@ module Fluent
       @out_keys = @out_keys.split(',')
 
       if @flush_interval < 60
-        log.info("flush_interval less than 60s is not allowed and overwriteen to 60s")
+        log.info("flush_interval less than 60s is not allowed and overwritten to 60s")
         @flush_interval = 60
       end
 
