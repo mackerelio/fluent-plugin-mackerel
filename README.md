@@ -4,6 +4,8 @@
 
 [Fluentd](http://fluentd.org) plugin to send metrics to [mackerel.io](http://mackerel.io/).
 
+This plugin includes two components, namely MackerelOutput and MackerelHostidTagOutput. The former is used to send metrics to mackerel and the latter is used to append mackerel hostid to tag or record.
+
 ## Installation
 
 Install with gem or fluent-gem command as:
@@ -18,7 +20,7 @@ $ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-mackerel
 
 ## Configuration
 
-### Usage
+### MackerelOutput
 
 This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of mackerel.io.
 ```
@@ -26,11 +28,10 @@ This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of macker
   type mackerel
   api_key 123456
   hostid xyz
-  metrics_prefix custom.http_status
+  metrics_name http_status.${out_key}
   out_keys 2xx_count,3xx_count,4xx_count,5xx_count
 </match>
 ```
-When metrics_prefix doesn't start with "custom.", "custom." is automatically appended at its beginning.
 
 Then the sent metric data will look like this:
 ```
@@ -41,9 +42,42 @@ Then the sent metric data will look like this:
   "value": 100.0
 }
 ```
-As shown above, metric name will be a concatenation of `metrics_prefix` and `out_keys` values.
+As shown above, metric name will be a concatenation of `metrics_name` and `out_keys` values when you use ${out_key} in metrics_name definition. In addition, "custom" will be appended before sending metrics to mackerel automatically.
 
+You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v0#service-metric-value-post) as follows.
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  service yourservice
+  metrics_name http_status.${out_key}
+  out_keys 2xx_count,3xx_count,4xx_count,5xx_count
+</match>
+```
 `flush_interval` is not allowed to set less than 60 secs not to send API requests more than once in a minute.
+
+Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
+
+### MackerelHostidTagOutput
+
+If you want to add the hostid to the record with a certain key name, do the following.
+```
+<match ...>
+  type mackerel_hostid_tag
+  add_to record
+  key_name mackerel_hostid
+</match>
+```
+As shown above, key_name field is required. Supposed host_id is "xyz" and input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then you can get `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4, "mackerel_hostid"=>"xyz"}]`
+
+To append hostid to the tag, you can simply configure "add_to" as "tag" like this.
+```
+<match ...>
+  type mackerel_hostid_tag
+  add_to tag
+</match>
+```
+When input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then the output will be `["test.xyz", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`
 
 ## TODO
 
