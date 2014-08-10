@@ -24,6 +24,7 @@ unless ENV.has_key?('VERBOSE')
 end
 
 require 'fluent/plugin/out_mackerel'
+require 'fluent/plugin/out_mackerel_hostid_tag'
 
 class Test::Unit::TestCase
 end

@@ -10,14 +10,14 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     hostid xyz
-    metrics_name service.{out_keys}
+    metrics_name service.${out_key}
     out_keys val1,val2,val3
   ]
 
   CONFIG_NOHOST = %[
     type mackerel
     api_key 123456
-    metrics_name service.{out_keys}
+    metrics_name service.${out_key}
     out_keys val1,val2,val3
   ]
 
@@ -32,7 +32,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     hostid xyz
-    metrics_name service.{out_keys}
+    metrics_name service.${out_key}
     out_keys val1,val2,val3
     flush_interval 1s
   ]
@@ -61,7 +61,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     d = create_driver()
     assert_equal d.instance.instance_variable_get(:@api_key), '123456'
     assert_equal d.instance.instance_variable_get(:@hostid), 'xyz'
-    assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.{out_keys}'
+    assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.${out_key}'
     assert_equal d.instance.instance_variable_get(:@out_keys), ['val1','val2','val3']
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
   end
