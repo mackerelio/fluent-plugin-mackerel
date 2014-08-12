@@ -89,6 +89,9 @@ module Fluent
 
         tokens = tag.split('.')
         out_keys.map do |key|
+
+          next unless record.has_key?(key)
+
           name = @name_processor.nil? ? key :
             @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 

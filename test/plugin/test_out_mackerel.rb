@@ -75,12 +75,15 @@ class MackerelOutputTest < Test::Unit::TestCase
       {"hostId"=>"xyz", "value"=>5.0, "time"=>1399997498, "name"=>"custom.service.val1"},
       {"hostId"=>"xyz", "value"=>6.0, "time"=>1399997498, "name"=>"custom.service.val2"},
       {"hostId"=>"xyz", "value"=>7.0, "time"=>1399997498, "name"=>"custom.service.val3"},
+      {"hostId"=>"xyz", "value"=>9.0, "time"=>1399997498, "name"=>"custom.service.val1"},
+      {"hostId"=>"xyz", "value"=>10.0, "time"=>1399997498, "name"=>"custom.service.val2"},
     ])
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
     d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
     d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
+    d.emit({'val1' => 9, 'val2' => 10}, t)
     d.run()
   end
 
