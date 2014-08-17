@@ -42,7 +42,30 @@ Then the sent metric data will look like this:
   "value": 100.0
 }
 ```
-As shown above, metric name will be a concatenation of `metrics_name` and `out_keys` values when you use ${out_key} in metrics_name definition. In addition, "custom" will be appended before sending metrics to mackerel automatically.
+As shown above, `${out_key}` will be replaced with out_key like "2xx_count" when sending metrics.
+
+You can use `${[n]}` for `mackerel_name` where `n` represents any decimal number including negative value,
+
+```
+<match mackerel.*>
+  type mackerel
+  api_key 123456
+  hostid xyz
+  metrics_name ${[1]}.${out_key}
+  out_keys 2xx_count,3xx_count,4xx_count,5xx_count
+</match>
+```
+
+then it indicates the `n` the value of the array got by splitting the tag by `.` (dot) and get the following output when the tag is `mackerel.http_status`.
+```
+{
+  "hostId": "xyz",
+  "name": "custom.http_status.2xx_count",
+  "time": 1399997498,
+  "value": 100.0
+}
+```
+"custom" will be appended to the `name` attribute before sending metrics to mackerel automatically.
 
 You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v0#service-metric-value-post) as follows.
 ```
