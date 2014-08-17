@@ -123,6 +123,10 @@ When releasing, call rake release as follows.
 $ bundle exec rake release
 ```
 
+## References
+
+* [How to use fluent-plugin-mackerel (Japanese)](http://qiita.com/tksmd/items/1212331a5a18afe520df)
+
 ## Copyright
 
 * Copyright (c) 2014- Takashi Someda ([@tksmd](http://twitter.com/tksmd/))
