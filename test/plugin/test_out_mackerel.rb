@@ -68,7 +68,7 @@ class MackerelOutputTest < Test::Unit::TestCase
 
   def test_write
     d = create_driver()
-    stub(d.instance.mackerel).post_metrics([
+    mock(d.instance.mackerel).post_metrics([
       {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.service.val1"},
       {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.service.val2"},
       {"hostId"=>"xyz", "value"=>3.0, "time"=>1399997498, "name"=>"custom.service.val3"},
