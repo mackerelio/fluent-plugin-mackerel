@@ -56,7 +56,7 @@ You can use `${[n]}` for `mackerel_name` where `n` represents any decimal number
 </match>
 ```
 
-then it indicates the `n` the value of the array got by splitting the tag by `.` (dot) and get the following output when the tag is `mackerel.http_status`.
+then it indicates value of the `n` th index of the array got by splitting the tag by `.` (dot) and get the following output when the tag is `mackerel.http_status`.
 ```
 {
   "hostId": "xyz",
@@ -77,7 +77,7 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
   out_keys 2xx_count,3xx_count,4xx_count,5xx_count
 </match>
 ```
-`flush_interval` is not allowed to set less than 60 secs not to send API requests more than once in a minute.
+`flush_interval` is not allowed to be set less than 60 secs not to send API requests more than once in a minute.
 
 Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
 
