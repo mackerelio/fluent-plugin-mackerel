@@ -10,6 +10,7 @@ module Fluent
     config_param :service, :string, :default => nil
     config_param :metrics_name, :string, :default => nil
     config_param :out_keys, :string
+    config_param :origin, :string, :default => nil
 
     attr_reader :mackerel
 
@@ -25,7 +26,7 @@ module Fluent
     def configure(conf)
       super
 
-      @mackerel = Mackerel::Client.new(:mackerel_api_key => conf['api_key'])
+      @mackerel = Mackerel::Client.new(:mackerel_api_key => conf['api_key'], :mackerel_origin => conf['origin'])
       @out_keys = @out_keys.split(',')
 
       if @flush_interval < 60

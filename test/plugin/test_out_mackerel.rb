@@ -37,6 +37,15 @@ class MackerelOutputTest < Test::Unit::TestCase
     flush_interval 1s
   ]
 
+  CONFIG_ORIGIN = %[
+    type mackerel
+    api_key 123456
+    hostid xyz
+    metrics_name service.${out_key}
+    out_keys val1,val2,val3
+    origin example.domain
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -57,6 +66,9 @@ class MackerelOutputTest < Test::Unit::TestCase
 
     d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+
+    d = create_driver(CONFIG_ORIGIN)
+    assert_equal d.instance.instance_variable_get(:@origin), 'example.domain'
 
     d = create_driver()
     assert_equal d.instance.instance_variable_get(:@api_key), '123456'
