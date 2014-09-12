@@ -123,6 +123,18 @@ When releasing, call rake release as follows.
 $ bundle exec rake release
 ```
 
+For debugging purpose, you can change Mackerel endpoint by `origin` parameter like this.
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  hostid xyz
+  metrics_name http_status.${out_key}
+  out_keys 2xx_count,3xx_count,4xx_count,5xx_count
+  origin https://example.com
+</match>
+```
+
 ## References
 
 * [How to use fluent-plugin-mackerel (Japanese)](http://qiita.com/tksmd/items/1212331a5a18afe520df)
