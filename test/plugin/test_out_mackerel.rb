@@ -46,6 +46,21 @@ class MackerelOutputTest < Test::Unit::TestCase
     origin example.domain
   ]
 
+  CONFIG_NO_OUT_KEYS = %[
+    type mackerel
+    api_key 123456
+    hostid xyz
+    metrics_name service.${out_key}
+  ]
+
+  CONFIG_OUT_KEY_PATTERN = %[
+    type mackerel
+    api_key 123456
+    hostid xyz
+    metrics_name service.${out_key}
+    out_key_pattern ^val[0-9]$
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -64,6 +79,10 @@ class MackerelOutputTest < Test::Unit::TestCase
       d = create_driver(CONFIG_BLANK_METRICS)
     }
 
+    assert_raise(Fluent::ConfigError) {
+      d = create_driver(CONFIG_NO_OUT_KEYS)
+    }
+
     d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
 
@@ -76,6 +95,10 @@ class MackerelOutputTest < Test::Unit::TestCase
     assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.${out_key}'
     assert_equal d.instance.instance_variable_get(:@out_keys), ['val1','val2','val3']
     assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+
+    d = create_driver(CONFIG_OUT_KEY_PATTERN)
+    assert_match d.instance.instance_variable_get(:@out_key_pattern), "val1"
+    assert_no_match d.instance.instance_variable_get(:@out_key_pattern), "foo"
   end
 
   def test_write
@@ -96,6 +119,19 @@ class MackerelOutputTest < Test::Unit::TestCase
     d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
     d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
     d.emit({'val1' => 9, 'val2' => 10}, t)
+    d.run()
+  end
+
+  def test_write_pattern
+    d = create_driver(CONFIG_OUT_KEY_PATTERN)
+    mock(d.instance.mackerel).post_metrics([
+      {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.service.val1"},
+      {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.service.val2"},
+    ])
+
+    ENV["TZ"]="Asia/Tokyo"
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
 

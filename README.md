@@ -81,6 +81,17 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
 
 Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
 
+You can use `out_key_pattern` instead of `out_key`. Input records key which matches for the pattern will be sent.
+
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  service yourservice
+  metrics_name http_status.${out_key}
+  out_key_pattern [2-5]xx_count
+```
+
 ### MackerelHostidTagOutput
 
 If you want to add the hostid to the record with a certain key name, do the following.
