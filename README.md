@@ -44,6 +44,17 @@ Then the sent metric data will look like this:
 ```
 As shown above, `${out_key}` will be replaced with out_key like "2xx_count" when sending metrics.
 
+You can use `out_key_pattern` instead of `out_keys`. Input records whose key matches the pattern set to `out_key_pattern` will be sent. Either `out_keys` or `out_key_pattern` is required.
+
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  service yourservice
+  metrics_name http_status.${out_key}
+  out_key_pattern [2-5]xx_count
+```
+
 You can use `${[n]}` for `mackerel_name` where `n` represents any decimal number including negative value,
 
 ```
@@ -80,17 +91,6 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
 `flush_interval` is not allowed to be set less than 60 secs not to send API requests more than once in a minute.
 
 Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
-
-You can use `out_key_pattern` instead of `out_key`. Input records key which matches for the pattern will be sent.
-
-```
-<match ...>
-  type mackerel
-  api_key 123456
-  service yourservice
-  metrics_name http_status.${out_key}
-  out_key_pattern [2-5]xx_count
-```
 
 ### MackerelHostidTagOutput
 
