@@ -9,7 +9,8 @@ module Fluent
     config_param :hostid_path, :string, :default => nil
     config_param :service, :string, :default => nil
     config_param :metrics_name, :string, :default => nil
-    config_param :out_keys, :string
+    config_param :out_keys, :string, :default => nil
+    config_param :out_key_pattern, :string, :default => nil
     config_param :origin, :string, :default => nil
 
     attr_reader :mackerel
@@ -27,7 +28,16 @@ module Fluent
       super
 
       @mackerel = Mackerel::Client.new(:mackerel_api_key => conf['api_key'], :mackerel_origin => conf['origin'])
-      @out_keys = @out_keys.split(',')
+
+      if @out_keys
+        @out_keys = @out_keys.split(',')
+      end
+      if @out_key_pattern
+        @out_key_pattern = Regexp.new(@out_key_pattern)
+      end
+      if @out_keys.nil? and @out_key_pattern.nil?
+        raise Fluent::ConfigError, "Either 'out_keys' or 'out_key_pattern' must be specifed."
+      end
 
       if @flush_interval < 60
         log.info("flush_interval less than 60s is not allowed and overwritten to 60s")
@@ -89,10 +99,14 @@ module Fluent
       chunk.msgpack_each do |(tag,time,record)|
 
         tokens = tag.split('.')
+
+        if @out_keys
+          out_keys = @out_keys.select{|key| record.has_key?(key)}
+        else # @out_key_pattern
+          out_keys = record.keys.select{|key| @out_key_pattern.match(key)}
+        end
+
         out_keys.map do |key|
-
-          next unless record.has_key?(key)
-
           name = @name_processor.nil? ? key :
             @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
