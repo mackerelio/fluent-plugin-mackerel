@@ -55,7 +55,7 @@ You can use `out_key_pattern` instead of `out_keys`. Input records whose key mat
   out_key_pattern [2-5]xx_count
 ```
 
-You can use `${[n]}` for `mackerel_name` where `n` represents any decimal number including negative value,
+You can use `${[n]}` for `metrics_name` where `n` represents any decimal number including negative value,
 
 ```
 <match mackerel.*>
