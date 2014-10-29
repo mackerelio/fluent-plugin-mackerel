@@ -129,6 +129,16 @@ To run tests, do the following.
 $ VERBOSE=1 bundle exec rake test
 ```
 
+If you want to run a certain file, run rake like this
+```
+$ VERBOSE=1 bundle exec rake test TEST=test/plugin/test_out_mackerel.rb
+```
+
+In addition, you can run specific method like this.
+```
+$ VERBOSE=1 bundle exec rake test TEST=test/plugin/test_out_mackerel.rb TESTOPTS="--name=test_configure"
+```
+
 When releasing, call rake release as follows.
 ```
 $ bundle exec rake release
