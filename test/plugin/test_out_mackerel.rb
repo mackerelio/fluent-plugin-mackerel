@@ -61,6 +61,14 @@ class MackerelOutputTest < Test::Unit::TestCase
     out_key_pattern ^val[0-9]$
   ]
 
+  CONFIG_FOR_ISSUE_4 = %[
+    type mackerel
+    api_key 123456
+    hostid xyz
+    metrics_name a-${[1]}-b.${out_key}
+    out_keys val1,val2
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -134,5 +142,54 @@ class MackerelOutputTest < Test::Unit::TestCase
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
+
+  def test_write_issue4
+    d = create_driver(CONFIG_FOR_ISSUE_4, tag='test.status')
+    mock(d.instance.mackerel).post_metrics([
+      {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.a-status-b.val1"},
+      {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.a-status-b.val2"},
+    ])
+
+    ENV["TZ"]="Asia/Tokyo"
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
+    d.run()
+  end
+
+  def test_name_processor
+    [
+      {metrics_name: "${out_key}", expected: "val1"},
+      {metrics_name: "name.${out_key}", expected: "name.val1"},
+      {metrics_name: "a-${out_key}", expected: "a-val1"},
+      {metrics_name: "${out_key}-b", expected: "val1-b"},
+      {metrics_name: "a-${out_key}-b", expected: "a-val1-b"},
+      {metrics_name: "name.a-${out_key}-b", expected: "name.a-val1-b"},
+      {metrics_name: "${out_key}-a-${out_key}", expected: "val1-a-val1"},
+      {metrics_name: "${out_keyx}", expected: "${out_keyx}"},
+      {metrics_name: "${[1]}", expected: "status"},
+      {metrics_name: "${[-1]}", expected: "status"},
+      {metrics_name: "name.${[1]}", expected: "name.status"},
+      {metrics_name: "a-${[1]}", expected: "a-status"},
+      {metrics_name: "${[1]}-b", expected: "status-b"},
+      {metrics_name: "a-${[1]}-b", expected: "a-status-b"},
+      {metrics_name: "${[0]}.${[1]}", expected: "test.status"},
+      {metrics_name: "${[0]}-${[1]}", expected: "test-status"},
+      {metrics_name: "${[0]}-${[1]}-${out_key}", expected: "test-status-val1"},
+      {metrics_name: "${[2]}", expected: ""},
+    ].map { |obj|
+      test_config = %[
+        type mackerel
+        api_key 123456
+        hostid xyz
+        metrics_name #{obj[:metrics_name]}
+        out_keys val1,val2
+      ]
+      d = create_driver(test_config, tag='test.status')
+      name_processor = d.instance.instance_variable_get(:@name_processor)
+      actual = name_processor.map{ |p| p.call(:out_key => 'val1', :tokens => ['test', 'status']) }.join('.')
+      assert_equal obj[:expected], actual
+    }
+  end
+
 
 end

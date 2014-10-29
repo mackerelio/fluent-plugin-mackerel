@@ -67,17 +67,15 @@ module Fluent
 
       if @metrics_name
         @name_processor = @metrics_name.split('.').map{ |token|
-          if token.start_with?('$')
-            token = token[2..-2]
-            if token == 'out_key'
-              Proc.new{ |args| args[:out_key] }
-            else
-              idx = token.match(/\[(-?\d+)\]/)[1].to_i
-              Proc.new{ |args| args[:tokens][idx] }
-            end
-          else
-            Proc.new{ token }
-          end
+          Proc.new{ |args|
+            token.gsub(/\${(out_key|\[(-?\d+)\])}/) {
+              if $1 == 'out_key'
+                args[:out_key]
+              else
+                args[:tokens][$1[1..-1].to_i]
+              end
+            }
+          }
         }
       end
     end
@@ -116,7 +114,6 @@ module Fluent
             'name' => "%s.%s" % ['custom', name]
           }
           metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
-
           metrics << metric
         end
       end
