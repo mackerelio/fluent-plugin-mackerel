@@ -148,6 +148,7 @@ For debugging purpose, you can change Mackerel endpoint by `origin` parameter li
 
 ## References
 
+* [Send service and host metric to Mackerel by using fluentd (Japanese, Official Document)](http://help-ja.mackerel.io/entry/advanced/fluentd)
 * [How to use fluent-plugin-mackerel (Japanese)](http://qiita.com/tksmd/items/1212331a5a18afe520df)
 
 ## Copyright
