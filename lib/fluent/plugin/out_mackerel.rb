@@ -135,6 +135,7 @@ module Fluent
         end
       rescue => e
         log.error("out_mackerel:", :error_class => e.class, :error => e.message)
+        raise e
       end
     end
 
