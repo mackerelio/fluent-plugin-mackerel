@@ -69,6 +69,21 @@ class MackerelOutputTest < Test::Unit::TestCase
     out_keys val1,val2
   ]
 
+  CONFIG_BUFFER_LIMIT_DEFAULT = %[
+    type mackerel
+    service xyz
+    api_key 123456
+    out_keys val1,val2,val3
+  ]
+
+  CONFIG_BUFFER_LIMIT_IGNORE = %[
+    type mackerel
+    service xyz
+    api_key 123456
+    out_keys val1,val2,val3
+    buffer_chunk_limit 1k
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -107,6 +122,13 @@ class MackerelOutputTest < Test::Unit::TestCase
     d = create_driver(CONFIG_OUT_KEY_PATTERN)
     assert_match d.instance.instance_variable_get(:@out_key_pattern), "val1"
     assert_no_match d.instance.instance_variable_get(:@out_key_pattern), "foo"
+
+    d = create_driver(CONFIG_BUFFER_LIMIT_DEFAULT)
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
+    assert_equal d.instance.instance_variable_get(:@buffer_queue_limit), 4096
+
+    d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
   end
 
   def test_write

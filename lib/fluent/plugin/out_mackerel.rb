@@ -13,6 +13,10 @@ module Fluent
     config_param :out_key_pattern, :string, :default => nil
     config_param :origin, :string, :default => nil
 
+    MAX_BUFFER_CHUNK_LIMIT = 100 * 1024
+    config_set_default :buffer_chunk_limit, MAX_BUFFER_CHUNK_LIMIT
+    config_set_default :buffer_queue_limit, 4096
+
     attr_reader :mackerel
 
     # Define `log` method for v0.10.42 or earlier
@@ -118,23 +122,22 @@ module Fluent
         end
       end
 
+      send(metrics) unless metrics.empty?
+      metrics.clear
+    end
+
+    def send(metrics)
       begin
-        while true
-          partial = metrics.slice!(0, 100)
-          if partial.empty?
-            break
-          end
-          if @hostid
-            @mackerel.post_metrics(partial)
-          else
-            @mackerel.post_service_metrics(@service, partial)
-          end
+        if @hostid
+          @mackerel.post_metrics(metrics)
+        else
+          @mackerel.post_service_metrics(@service, metrics)
         end
       rescue => e
         log.error("out_mackerel:", :error_class => e.class, :error => e.message)
       end
-      metrics.clear
     end
+
   end
 
 end
