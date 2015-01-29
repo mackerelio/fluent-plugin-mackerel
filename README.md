@@ -90,6 +90,13 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
 ```
 `flush_interval` is not allowed to be set less than 60 secs not to send API requests more than once in a minute.
 
+This plugin overwrites the default value of `buffer_queue_limit` and `buffer_chunk_limit` as follows.
+
+* buffer_queue_limit to 4096
+* buffer_chunk_limit to 100K
+
+Without any special reasons to change, you should leave them as they are.
+
 Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
 
 ### MackerelHostidTagOutput
@@ -158,7 +165,7 @@ For debugging purpose, you can change Mackerel endpoint by `origin` parameter li
 
 ## References
 
-* [Send service and host metric to Mackerel by using fluentd (Japanese, Official Document)](http://help-ja.mackerel.io/entry/advanced/fluentd)
+* [Posting Service Metrics with fluentd](http://help.mackerel.io/entry/advanced/fluentd)
 * [How to use fluent-plugin-mackerel (Japanese)](http://qiita.com/tksmd/items/1212331a5a18afe520df)
 
 ## Copyright
