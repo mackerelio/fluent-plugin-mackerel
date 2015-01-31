@@ -8,6 +8,7 @@ module Fluent
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
     config_param :service, :string, :default => nil
+    config_param :remove_prefix, :bool, :default => false
     config_param :metrics_name, :string, :default => nil
     config_param :out_keys, :string, :default => nil
     config_param :out_key_pattern, :string, :default => nil
@@ -58,6 +59,10 @@ module Fluent
 
       if @hostid and @service
         raise Fluent::ConfigError, "Niether 'hostid' and 'service' cannot be specifed."
+      end
+
+      if @remove_prefix and @service.nil?
+        raise Fluent::ConfigError, "'remove_prefix' must be used with 'service'."
       end
 
       unless @hostid.nil?
@@ -115,7 +120,7 @@ module Fluent
           metric = {
             'value' => record[key].to_f,
             'time' => time,
-            'name' => "%s.%s" % ['custom', name]
+            'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
           }
           metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
           metrics << metric

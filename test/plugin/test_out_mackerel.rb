@@ -84,6 +84,22 @@ class MackerelOutputTest < Test::Unit::TestCase
     buffer_chunk_limit 1k
   ]
 
+
+  CONFIG_SERVICE = %[
+    type mackerel
+    api_key 123456
+    service xyz
+    out_keys val1,val2,val3
+  ]
+
+  CONFIG_SERVICE_REMOVE_PREFIX = %[
+    type mackerel
+    api_key 123456
+    service xyz
+    remove_prefix
+    out_keys val1,val2,val3
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -129,7 +145,8 @@ class MackerelOutputTest < Test::Unit::TestCase
 
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
     assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
-  end
+
+end
 
   def test_write
     d = create_driver()
@@ -170,6 +187,32 @@ class MackerelOutputTest < Test::Unit::TestCase
     mock(d.instance.mackerel).post_metrics([
       {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.a-status-b.val1"},
       {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.a-status-b.val2"},
+    ])
+
+    ENV["TZ"]="Asia/Tokyo"
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    d.emit({'val1' => 1, 'val2' => 2}, t)
+    d.run()
+  end
+
+  def test_service
+    d = create_driver(CONFIG_SERVICE)
+    mock(d.instance.mackerel).post_service_metrics('xyz', [
+      {"value"=>1.0, "time"=>1399997498, "name"=>"custom.val1"},
+      {"value"=>2.0, "time"=>1399997498, "name"=>"custom.val2"},
+    ])
+
+    ENV["TZ"]="Asia/Tokyo"
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
+    d.run()
+  end
+
+  def test_service_remove_prefix
+    d = create_driver(CONFIG_SERVICE_REMOVE_PREFIX)
+    mock(d.instance.mackerel).post_service_metrics('xyz', [
+      {"value"=>1.0, "time"=>1399997498, "name"=>"val1"},
+      {"value"=>2.0, "time"=>1399997498, "name"=>"val2"},
     ])
 
     ENV["TZ"]="Asia/Tokyo"
