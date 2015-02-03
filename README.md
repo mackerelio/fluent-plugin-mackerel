@@ -88,6 +88,21 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
   out_keys 2xx_count,3xx_count,4xx_count,5xx_count
 </match>
 ```
+
+When you send service metric, "custom" can be removed with `remove_prefix` as follows.
+This option is not availabe when sending host metric.
+
+```
+<match ...>
+  type mackerel
+  api_key 123456
+  service yourservice
+  remove_prefix
+  metrics_name http_status.${out_key}
+  out_keys 2xx_count,3xx_count,4xx_count,5xx_count
+</match>
+```
+
 `flush_interval` is not allowed to be set less than 60 secs not to send API requests more than once in a minute.
 
 This plugin overwrites the default value of `buffer_queue_limit` and `buffer_chunk_limit` as follows.
