@@ -84,7 +84,6 @@ class MackerelOutputTest < Test::Unit::TestCase
     buffer_chunk_limit 1k
   ]
 
-
   CONFIG_SERVICE = %[
     type mackerel
     api_key 123456
@@ -96,6 +95,13 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     service xyz
+    remove_prefix
+    out_keys val1,val2,val3
+  ]
+
+  CONFIG_INVALID_REMOVE_PREFIX = %[
+    type mackerel
+    api_key 123456
     remove_prefix
     out_keys val1,val2,val3
   ]
@@ -120,6 +126,10 @@ class MackerelOutputTest < Test::Unit::TestCase
 
     assert_raise(Fluent::ConfigError) {
       d = create_driver(CONFIG_NO_OUT_KEYS)
+    }
+
+    assert_raise(Fluent::ConfigError) {
+      d = create_driver(CONFIG_INVALID_REMOVE_PREFIX)
     }
 
     d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
