@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-mackerel"
-  spec.version       = "0.1.0"
+  spec.version       = "0.1.1"
   spec.authors       = ["tksmd","hatz48","stanaka","Songmu"]
   spec.email         = ["developers@mackerel.io"]
   spec.description   = %q{fluent plugin to send metrics to mackerel.io}
