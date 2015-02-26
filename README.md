@@ -183,7 +183,12 @@ For debugging purpose, you can change Mackerel endpoint by `origin` parameter li
 * [Posting Service Metrics with fluentd](http://help.mackerel.io/entry/advanced/fluentd)
 * [How to use fluent-plugin-mackerel (Japanese)](http://qiita.com/tksmd/items/1212331a5a18afe520df)
 
+## Authors
+
+- Takashi Someda ([@tksmd](http://twitter.com/tksmd/))
+- Mackerel Development Team
+
 ## Copyright
 
-* Copyright (c) 2014- Takashi Someda ([@tksmd](http://twitter.com/tksmd/))
+* Copyright (c) 2014- Hatena Co., Ltd. and Authors
 * Apache License, Version 2.0
