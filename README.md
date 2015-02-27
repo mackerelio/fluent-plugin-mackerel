@@ -1,4 +1,4 @@
-# fluent-plugin-mackerel [![Build Status](https://travis-ci.org/tksmd/fluent-plugin-mackerel.png?branch=master)](https://travis-ci.org/tksmd/fluent-plugin-mackerel)
+# fluent-plugin-mackerel [![Build Status](https://travis-ci.org/mackerelio/fluent-plugin-mackerel.png?branch=master)](https://travis-ci.org/mackerelio/fluent-plugin-mackerel)
 
 ## Overview
 
