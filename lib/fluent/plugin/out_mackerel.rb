@@ -102,37 +102,49 @@ module Fluent
       [tag, time, record].to_msgpack
     end
 
+    def generate_metric(key, tokens, time, value)
+      name = @name_processor.nil? ? key :
+               @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
+
+      metric = {
+        'value' => value,
+        'time' => time,
+        'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
+      }
+      metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
+      return metric
+    end
+
     def write(chunk)
       metrics = []
+      processed = {}
+      tags = {}
+      time_latest = 0
       chunk.msgpack_each do |(tag,time,record)|
-
+        tags[tag] = true
         tokens = tag.split('.')
 
         if @out_keys
-          # out_keys = @out_keys.select{|key| record.has_key?(key)}
-          out_keys = @out_keys
+          out_keys = @out_keys.select{|key| record.has_key?(key)}
         else # @out_key_pattern
           out_keys = record.keys.select{|key| @out_key_pattern.match(key)}
         end
 
         out_keys.map do |key|
-          name = @name_processor.nil? ? key :
-            @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
+          metrics << generate_metric(key, tokens, time, record[key].to_f)
+          time_latest = time if time_latest == 0 || time_latest < time
+          processed[tag + "." + key] = true
+        end
+      end
 
-          if record.has_key?(key)
-            value = record[key].to_f
-          elsif @use_zero_for_empty
-            value = 0.0
-          else
-            next
+      if @out_keys && @use_zero_for_empty
+        tags.each_key do |tag|
+          tokens = tag.split('.')
+          @out_keys.each do |key|
+            unless processed[tag + "." + key]
+              metrics << generate_metric(key, tokens, time_latest, 0.0)
+            end
           end
-          metric = {
-            'value' => value,
-            'time' => time,
-            'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
-          }
-          metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
-          metrics << metric
         end
       end
 
