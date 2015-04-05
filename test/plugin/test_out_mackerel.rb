@@ -106,6 +106,14 @@ class MackerelOutputTest < Test::Unit::TestCase
     out_keys val1,val2,val3
   ]
 
+  CONFIG_SERVICE_USE_ZERO = %[
+    type mackerel
+    api_key 123456
+    service xyz
+    use_zero_for_empty
+    out_keys val1,val2,val3
+  ]
+
   def create_driver(conf = CONFIG, tag='test')
     Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
   end
@@ -223,6 +231,20 @@ end
     mock(d.instance.mackerel).post_service_metrics('xyz', [
       {"value"=>1.0, "time"=>1399997498, "name"=>"val1"},
       {"value"=>2.0, "time"=>1399997498, "name"=>"val2"},
+    ])
+
+    ENV["TZ"]="Asia/Tokyo"
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
+    d.run()
+  end
+
+  def test_service_use_zero
+    d = create_driver(CONFIG_SERVICE_USE_ZERO)
+    mock(d.instance.mackerel).post_service_metrics('xyz', [
+      {"value"=>1.0, "time"=>1399997498, "name"=>"custom.val1"},
+      {"value"=>2.0, "time"=>1399997498, "name"=>"custom.val2"},
+      {"value"=>0.0, "time"=>1399997498, "name"=>"custom.val3"},
     ])
 
     ENV["TZ"]="Asia/Tokyo"

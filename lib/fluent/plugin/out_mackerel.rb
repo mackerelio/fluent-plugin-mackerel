@@ -13,6 +13,7 @@ module Fluent
     config_param :out_keys, :string, :default => nil
     config_param :out_key_pattern, :string, :default => nil
     config_param :origin, :string, :default => nil
+    config_param :use_zero_for_empty, :bool, :default => false
 
     MAX_BUFFER_CHUNK_LIMIT = 100 * 1024
     config_set_default :buffer_chunk_limit, MAX_BUFFER_CHUNK_LIMIT
@@ -108,7 +109,8 @@ module Fluent
         tokens = tag.split('.')
 
         if @out_keys
-          out_keys = @out_keys.select{|key| record.has_key?(key)}
+          # out_keys = @out_keys.select{|key| record.has_key?(key)}
+          out_keys = @out_keys
         else # @out_key_pattern
           out_keys = record.keys.select{|key| @out_key_pattern.match(key)}
         end
@@ -117,8 +119,15 @@ module Fluent
           name = @name_processor.nil? ? key :
             @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
 
+          if record.has_key?(key)
+            value = record[key].to_f
+          elsif @use_zero_for_empty
+            value = 0.0
+          else
+            next
+          end
           metric = {
-            'value' => record[key].to_f,
+            'value' => value,
             'time' => time,
             'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
           }
