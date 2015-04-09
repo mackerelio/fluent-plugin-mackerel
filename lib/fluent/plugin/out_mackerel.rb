@@ -13,7 +13,7 @@ module Fluent
     config_param :out_keys, :string, :default => nil
     config_param :out_key_pattern, :string, :default => nil
     config_param :origin, :string, :default => nil
-    config_param :use_zero_for_empty, :bool, :default => false
+    config_param :use_zero_for_empty, :bool, :default => true
 
     MAX_BUFFER_CHUNK_LIMIT = 100 * 1024
     config_set_default :buffer_chunk_limit, MAX_BUFFER_CHUNK_LIMIT
