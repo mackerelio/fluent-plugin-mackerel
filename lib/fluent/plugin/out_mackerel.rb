@@ -153,6 +153,7 @@ module Fluent
     end
 
     def send(metrics)
+      log.debug("out_mackerel: #{metrics}")
       begin
         if @hostid
           @mackerel.post_metrics(metrics)
