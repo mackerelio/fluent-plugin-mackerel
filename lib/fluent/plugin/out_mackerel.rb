@@ -13,6 +13,7 @@ module Fluent
     config_param :out_keys, :string, :default => nil
     config_param :out_key_pattern, :string, :default => nil
     config_param :origin, :string, :default => nil
+    config_param :use_zero_for_empty, :bool, :default => true
 
     MAX_BUFFER_CHUNK_LIMIT = 100 * 1024
     config_set_default :buffer_chunk_limit, MAX_BUFFER_CHUNK_LIMIT
@@ -101,10 +102,26 @@ module Fluent
       [tag, time, record].to_msgpack
     end
 
+    def generate_metric(key, tokens, time, value)
+      name = @name_processor.nil? ? key :
+               @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
+
+      metric = {
+        'value' => value,
+        'time' => time,
+        'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
+      }
+      metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
+      return metric
+    end
+
     def write(chunk)
       metrics = []
+      processed = {}
+      tags = {}
+      time_latest = 0
       chunk.msgpack_each do |(tag,time,record)|
-
+        tags[tag] = true
         tokens = tag.split('.')
 
         if @out_keys
@@ -114,16 +131,20 @@ module Fluent
         end
 
         out_keys.map do |key|
-          name = @name_processor.nil? ? key :
-            @name_processor.map{ |p| p.call(:out_key => key, :tokens => tokens) }.join('.')
+          metrics << generate_metric(key, tokens, time, record[key].to_f)
+          time_latest = time if time_latest == 0 || time_latest < time
+          processed[tag + "." + key] = true
+        end
+      end
 
-          metric = {
-            'value' => record[key].to_f,
-            'time' => time,
-            'name' => @remove_prefix ? name : "%s.%s" % ['custom', name]
-          }
-          metric['hostId'] = @hostid_processor.call(:tokens => tokens) if @hostid
-          metrics << metric
+      if @out_keys && @use_zero_for_empty
+        tags.each_key do |tag|
+          tokens = tag.split('.')
+          @out_keys.each do |key|
+            unless processed[tag + "." + key]
+              metrics << generate_metric(key, tokens, time_latest, 0.0)
+            end
+          end
         end
       end
 
@@ -132,6 +153,7 @@ module Fluent
     end
 
     def send(metrics)
+      log.debug("out_mackerel: #{metrics}")
       begin
         if @hostid
           @mackerel.post_metrics(metrics)

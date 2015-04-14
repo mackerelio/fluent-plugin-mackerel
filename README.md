@@ -29,6 +29,7 @@ This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of macker
   api_key 123456
   hostid xyz
   metrics_name http_status.${out_key}
+  use_zero_for_empty
   out_keys 2xx_count,3xx_count,4xx_count,5xx_count
 </match>
 ```
@@ -43,6 +44,9 @@ Then the sent metric data will look like this:
 }
 ```
 As shown above, `${out_key}` will be replaced with out_key like "2xx_count" when sending metrics.
+
+In the case some outkeys do not have any value, the value will be set to `0` with `use_zero_for_empty`, the default of which is true.
+For example, you set `out_keys 2xx_count,3xx_count,4xx_count,5xx_count`, but you only get `2xx_count`, `3xx_count` and `4xx_count`, then `5xx_count` will be set to `0` with `use_zero_for_empty`.
 
 You can use `out_key_pattern` instead of `out_keys`. Input records whose key matches the pattern set to `out_key_pattern` will be sent. Either `out_keys` or `out_key_pattern` is required.
 
