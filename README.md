@@ -2,13 +2,13 @@
 
 ## Overview
 
-[Fluentd](http://fluentd.org) plugin to send metrics to [mackerel.io](http://mackerel.io/).
+This is the plugin for sending metrics to [mackerel.io](http://mackerel.io/) using [Fluentd](http://fluentd.org).
 
-This plugin includes two components, namely MackerelOutput and MackerelHostidTagOutput. The former is used to send metrics to mackerel and the latter is used to append mackerel hostid to tag or record.
+This plugin includes two components, MackerelOutput and MackerelHostidTagOutput. The former is used to send metrics to Mackerel and the latter is used to append the Mackerel hostid for tagging or recording.
 
 ## Installation
 
-Install with gem or fluent-gem command as:
+Install with either the gem or fluent-gem command as shown:
 
 ```
 # for fluentd
@@ -22,7 +22,7 @@ $ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-mackerel
 
 ### MackerelOutput
 
-This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of mackerel.io.
+This plugin uses mackerel.io's [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0).
 ```
 <match ...>
   type mackerel
@@ -34,7 +34,7 @@ This plugin uses [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0) of macker
 </match>
 ```
 
-Then the sent metric data will look like this:
+Metric data that has been sent will look like this:
 ```
 {
   "hostId": "xyz",
@@ -45,10 +45,10 @@ Then the sent metric data will look like this:
 ```
 As shown above, `${out_key}` will be replaced with out_key like "2xx_count" when sending metrics.
 
-In the case some outkeys do not have any value, the value will be set to `0` with `use_zero_for_empty`, the default of which is true.
-For example, you set `out_keys 2xx_count,3xx_count,4xx_count,5xx_count`, but you only get `2xx_count`, `3xx_count` and `4xx_count`, then `5xx_count` will be set to `0` with `use_zero_for_empty`.
+In the case an outkey does not have any value, the value will be set to `0` with `use_zero_for_empty`, the default of which is true.
+For example, if you have set `out_keys 2xx_count,3xx_count,4xx_count,5xx_count`, but only get `2xx_count`, `3xx_count` and `4xx_count`, then `5xx_count` will be set to `0` with `use_zero_for_empty`.
 
-You can use `out_key_pattern` instead of `out_keys`. Input records whose key matches the pattern set to `out_key_pattern` will be sent. Either `out_keys` or `out_key_pattern` is required.
+`out_key_pattern` can be used instead of `out_keys`. Input records whose keys match the pattern set to `out_key_pattern` will be sent. Either `out_keys` or `out_key_pattern` is required.
 
 ```
 <match ...>
@@ -59,7 +59,7 @@ You can use `out_key_pattern` instead of `out_keys`. Input records whose key mat
   out_key_pattern [2-5]xx_count
 ```
 
-You can use `${[n]}` for `metrics_name` where `n` represents any decimal number including negative value,
+`${[n]}` can be used as a tag for `metrics_name` where `n` represents any decimal number including negative values.
 
 ```
 <match mackerel.*>
@@ -71,7 +71,7 @@ You can use `${[n]}` for `metrics_name` where `n` represents any decimal number 
 </match>
 ```
 
-then it indicates value of the `n` th index of the array got by splitting the tag by `.` (dot) and get the following output when the tag is `mackerel.http_status`.
+This indicates the value of the `n` th index of the array. By splitting the tag with a `.` (dot) the following output can be got when the tag is `mackerel.http_status`.
 ```
 {
   "hostId": "xyz",
@@ -80,9 +80,9 @@ then it indicates value of the `n` th index of the array got by splitting the ta
   "value": 100.0
 }
 ```
-"custom" will be appended to the `name` attribute before sending metrics to mackerel automatically.
+"custom" will be automatically appended to the `name` attribute before sending metrics to mackerel.
 
-You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v0#service-metric-value-post) as follows.
+You can also send [service metrics](http://help.mackerel.io/entry/spec/api/v0#service-metric-value-post) as shown.
 ```
 <match ...>
   type mackerel
@@ -93,8 +93,8 @@ You can also send ["service" metric](http://help-ja.mackerel.io/entry/spec/api/v
 </match>
 ```
 
-When you send service metric, "custom" can be removed with `remove_prefix` as follows.
-This option is not availabe when sending host metric.
+When sending service metrics, the prefix "custom" can be removed with `remove_prefix` as follows.
+This option is not availabe when sending host metrics.
 
 ```
 <match ...>
@@ -107,20 +107,20 @@ This option is not availabe when sending host metric.
 </match>
 ```
 
-`flush_interval` is not allowed to be set less than 60 secs not to send API requests more than once in a minute.
+`flush_interval` may not be set to less than 60 seconds so as not to send API requests more than once per minute.
 
-This plugin overwrites the default value of `buffer_queue_limit` and `buffer_chunk_limit` as follows.
+This plugin overwrites the default values of `buffer_queue_limit` and `buffer_chunk_limit` as shown.
 
 * buffer_queue_limit to 4096
 * buffer_chunk_limit to 100K
 
-Without any special reasons to change, you should leave them as they are.
+Unless there is some particular reason to change these values, we suggest leaving them as is.
 
-Since version 0.0.4, metrics_prefix was removed and you should use metrics_name instead.
+From version 0.0.4 and on, metrics_prefix has been removed and metrics_name should be used instead.
 
 ### MackerelHostidTagOutput
 
-If you want to add the hostid to the record with a certain key name, do the following.
+Let's say you want to add the hostid to the record with a specific key name...
 ```
 <match ...>
   type mackerel_hostid_tag
@@ -128,16 +128,16 @@ If you want to add the hostid to the record with a certain key name, do the foll
   key_name mackerel_hostid
 </match>
 ```
-As shown above, key_name field is required. Supposed host_id is "xyz" and input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then you can get `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4, "mackerel_hostid"=>"xyz"}]`
+As shown above, the key_name field is required. For example if the host_id is "xyz" and input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, you'll get `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4, "mackerel_hostid"=>"xyz"}]`
 
-To append hostid to the tag, you can simply configure "add_to" as "tag" like this.
+To append the hostid to the tag, you can simply configure "add_to" as "tag" like this.
 ```
 <match ...>
   type mackerel_hostid_tag
   add_to tag
 </match>
 ```
-When input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then the output will be `["test.xyz", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`
+If the input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then the output will be `["test.xyz", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`
 
 ## TODO
 
@@ -145,12 +145,12 @@ Pull requests are very welcome!!
 
 ## For developers
 
-You have to run the command below when starting development.
+You'll need to run the command below when starting development.
 ```
 $ bundle install --path vendor/bundle
 ```
 
-To run tests, do the following.
+To run tests...
 ```
 $ VERBOSE=1 bundle exec rake test
 ```
@@ -160,17 +160,17 @@ If you want to run a certain file, run rake like this
 $ VERBOSE=1 bundle exec rake test TEST=test/plugin/test_out_mackerel.rb
 ```
 
-In addition, you can run specific method like this.
+Additionally, you can run a specific method like this.
 ```
 $ VERBOSE=1 bundle exec rake test TEST=test/plugin/test_out_mackerel.rb TESTOPTS="--name=test_configure"
 ```
 
-When releasing, call rake release as follows.
+When releasing, call rake release as shown.
 ```
 $ bundle exec rake release
 ```
 
-For debugging purpose, you can change Mackerel endpoint by `origin` parameter like this.
+For debugging purposes, you can change the Mackerel endpoint with an `origin` parameter like this.
 ```
 <match ...>
   type mackerel
