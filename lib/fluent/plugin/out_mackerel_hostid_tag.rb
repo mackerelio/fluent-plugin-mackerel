@@ -14,6 +14,11 @@ module Fluent
       define_method("log") { $log }
     end
 
+    # Define `router` method to support v0.10.57 or earlier
+    unless method_defined?(:router)
+      define_method("router") { Fluent::Engine }
+    end
+
     def initialize
       super
     end
