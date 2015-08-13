@@ -49,7 +49,7 @@ module Fluent
         if @add_to == 'record'
           record[@key_name] = @hostid
         end
-        Fluent::Engine.emit(tag, time, record)
+        router.emit(tag, time, record)
       end
 
       chain.next
