@@ -14,6 +14,11 @@ module Fluent
       define_method("log") { $log }
     end
 
+    # Define `router` method to support v0.10.57 or earlier
+    unless method_defined?(:router)
+      define_method("router") { Fluent::Engine }
+    end
+
     def initialize
       super
     end
@@ -49,7 +54,7 @@ module Fluent
         if @add_to == 'record'
           record[@key_name] = @hostid
         end
-        Fluent::Engine.emit(tag, time, record)
+        router.emit(tag, time, record)
       end
 
       chain.next
