@@ -4,7 +4,7 @@ module Fluent
   class MackerelOutput < Fluent::BufferedOutput
     Fluent::Plugin.register_output('mackerel', self)
 
-    config_param :api_key, :string
+    config_param :api_key, :string, :secret => true
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
     config_param :service, :string, :default => nil
