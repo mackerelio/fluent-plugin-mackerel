@@ -139,6 +139,8 @@ To append the hostid to the tag, you can simply configure "add_to" as "tag" like
 ```
 If the input is `["test", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`, then the output will be `["test.xyz", 1407650400, {"val1"=>1, "val2"=>2, "val3"=>3, "val4"=>4}]`
 
+Both `add_prefix` and `remove_prefix` options are availale to control rebuilding tags.
+
 ## TODO
 
 Pull requests are very welcome!!
