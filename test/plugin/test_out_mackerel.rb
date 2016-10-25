@@ -114,8 +114,8 @@ class MackerelOutputTest < Test::Unit::TestCase
     out_keys val1,val2,val3
   ]
 
-  def create_driver(conf = CONFIG, tag='test')
-    Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
+  def create_driver(conf = CONFIG)
+    Fluent::Test::Driver::Output.new(Fluent::Plugin::MackerelOutput).configure(conf)
   end
 
   def test_configure
@@ -182,10 +182,11 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
-    d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
-    d.emit({'val1' => 9, 'val2' => 10}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4})
+      d.feed(t, {'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8})
+      d.feed(t, {'val1' => 9, 'val2' => 10})
+    end
   end
 
   def test_write_pattern
@@ -197,12 +198,13 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_write_issue4
-    d = create_driver(CONFIG_FOR_ISSUE_4, tag='test.status')
+    d = create_driver(CONFIG_FOR_ISSUE_4)
     mock(d.instance.mackerel).post_metrics([
       {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.a-status-b.val1"},
       {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.a-status-b.val2"},
@@ -210,8 +212,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2}, t)
-    d.run()
+    d.run(default_tag: 'test.status') do
+      d.feed(t, {'val1' => 1, 'val2' => 2})
+    end
   end
 
   def test_service
@@ -223,8 +226,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_service_remove_prefix
@@ -236,8 +240,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_service_use_zero
@@ -250,8 +255,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_name_processor
@@ -282,7 +288,7 @@ end
         metrics_name #{obj[:metrics_name]}
         out_keys val1,val2
       ]
-      d = create_driver(test_config, tag='test.status')
+      d = create_driver(test_config)
       name_processor = d.instance.instance_variable_get(:@name_processor)
       actual = name_processor.map{ |p| p.call(:out_key => 'val1', :tokens => ['test', 'status']) }.join('.')
       assert_equal obj[:expected], actual

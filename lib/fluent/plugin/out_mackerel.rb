@@ -1,8 +1,10 @@
 require 'mackerel/client'
 
-module Fluent
-  class MackerelOutput < Fluent::BufferedOutput
+module Fluent::Plugin
+  class MackerelOutput < Output
     Fluent::Plugin.register_output('mackerel', self)
+
+    helpers :compat_parameters
 
     config_param :api_key, :string, :secret => true
     config_param :hostid, :string, :default => nil
@@ -31,6 +33,7 @@ module Fluent
     end
 
     def configure(conf)
+      compat_parameters_convert(conf, :buffer)
       super
 
       @mackerel = Mackerel::Client.new(:mackerel_api_key => conf['api_key'], :mackerel_origin => conf['origin'])
@@ -45,7 +48,7 @@ module Fluent
         raise Fluent::ConfigError, "Either 'out_keys' or 'out_key_pattern' must be specifed."
       end
 
-      if @flush_interval < 60
+      if @flush_interval and @flush_interval < 60
         log.info("flush_interval less than 60s is not allowed and overwritten to 60s")
         @flush_interval = 60
       end
@@ -96,6 +99,10 @@ module Fluent
 
     def shutdown
       super
+    end
+
+    def formatted_to_msgpack_binary
+      true
     end
 
     def format(tag, time, record)

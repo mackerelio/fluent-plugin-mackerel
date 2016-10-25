@@ -23,6 +23,8 @@ unless ENV.has_key?('VERBOSE')
   $log = nulllogger
 end
 
+require 'test/unit/rr'
+require 'fluent/test/driver/output'
 require 'fluent/plugin/out_mackerel'
 require 'fluent/plugin/out_mackerel_hostid_tag'
 
