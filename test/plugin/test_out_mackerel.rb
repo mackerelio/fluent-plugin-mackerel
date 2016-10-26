@@ -140,8 +140,9 @@ class MackerelOutputTest < Test::Unit::TestCase
       d = create_driver(CONFIG_INVALID_REMOVE_PREFIX)
     }
 
-    d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
-    assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+    assert_raise(Fluent::ConfigError) {
+      d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
+    }
 
     d = create_driver(CONFIG_ORIGIN)
     assert_equal d.instance.instance_variable_get(:@origin), 'example.domain'
@@ -151,19 +152,19 @@ class MackerelOutputTest < Test::Unit::TestCase
     assert_equal d.instance.instance_variable_get(:@hostid), 'xyz'
     assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.${out_key}'
     assert_equal d.instance.instance_variable_get(:@out_keys), ['val1','val2','val3']
-    assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+    buffer = d.instance.instance_variable_get(:@buffer_config)
+    assert_equal buffer.flush_interval, 60
 
     d = create_driver(CONFIG_OUT_KEY_PATTERN)
     assert_match d.instance.instance_variable_get(:@out_key_pattern), "val1"
     assert_no_match d.instance.instance_variable_get(:@out_key_pattern), "foo"
 
     d = create_driver(CONFIG_BUFFER_LIMIT_DEFAULT)
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::Plugin::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
     assert_equal d.instance.instance_variable_get(:@buffer_queue_limit), 4096
 
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
-    new_limit = Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT/100
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), new_limit
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::Plugin::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
 
 end
 

@@ -6,6 +6,8 @@ module Fluent::Plugin
 
     helpers :compat_parameters
 
+    DEFAULT_FLUSH_INTERVAL = 60
+
     config_param :api_key, :string, :secret => true
     config_param :hostid, :string, :default => nil
     config_param :hostid_path, :string, :default => nil
@@ -20,6 +22,10 @@ module Fluent::Plugin
     MAX_BUFFER_CHUNK_LIMIT = 100 * 1024
     config_set_default :buffer_chunk_limit, MAX_BUFFER_CHUNK_LIMIT
     config_set_default :buffer_queue_limit, 4096
+    config_section :buffer do
+      config_set_default :@type, 'memory'
+      config_set_default :flush_interval, DEFAULT_FLUSH_INTERVAL
+    end
 
     attr_reader :mackerel
 
@@ -48,9 +54,8 @@ module Fluent::Plugin
         raise Fluent::ConfigError, "Either 'out_keys' or 'out_key_pattern' must be specifed."
       end
 
-      if @flush_interval and @flush_interval < 60
-        log.info("flush_interval less than 60s is not allowed and overwritten to 60s")
-        @flush_interval = 60
+      if @buffer_config.flush_interval and @buffer_config.flush_interval < 60
+        raise Fluent::ConfigError, "flush_interval less than 60s is not allowed."
       end
 
       unless @hostid_path.nil?
