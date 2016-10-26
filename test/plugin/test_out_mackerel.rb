@@ -180,7 +180,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
     d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
     d.emit({'val1' => 9, 'val2' => 10}, t)
@@ -195,7 +195,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -208,7 +208,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2}, t)
     d.run()
   end
@@ -221,7 +221,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -234,7 +234,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -248,7 +248,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
