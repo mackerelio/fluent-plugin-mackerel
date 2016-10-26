@@ -88,7 +88,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     service xyz
-    out_keys val1,val2,val3
+    out_keys val1,val2
   ]
 
   CONFIG_SERVICE_REMOVE_PREFIX = %[
@@ -96,7 +96,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     api_key 123456
     service xyz
     remove_prefix
-    out_keys val1,val2,val3
+    out_keys val1,val2
   ]
 
   CONFIG_INVALID_REMOVE_PREFIX = %[
