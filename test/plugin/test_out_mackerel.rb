@@ -162,7 +162,8 @@ class MackerelOutputTest < Test::Unit::TestCase
     assert_equal d.instance.instance_variable_get(:@buffer_queue_limit), 4096
 
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
+    new_limit = Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT/100
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), new_limit
 
 end
 
