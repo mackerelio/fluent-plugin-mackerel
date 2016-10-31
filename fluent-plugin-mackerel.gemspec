@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "test-unit"
   spec.add_development_dependency "test-unit-rr"
-  spec.add_runtime_dependency "fluentd"
+  spec.add_runtime_dependency "fluentd", [">= 0.14.8", "< 2"]
 
   spec.required_ruby_version = '>= 1.9.3'
 end
