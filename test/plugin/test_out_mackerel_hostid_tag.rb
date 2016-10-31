@@ -101,7 +101,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 2, emits.length
     assert_equal 'test.xyz', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 4, emits[0][2].length # record
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record
@@ -109,7 +109,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     assert_equal 4, emits[0][2]["val4"] # record
 
     assert_equal 'test.xyz', emits[1][0] # tag
-    assert_equal 1407650400, emits[1][1] # time
+    assert_equal 1407650400, emits[1][1].to_i # time
     assert_equal 4, emits[1][2].length # record
     assert_equal 5, emits[1][2]["val1"] # record
     assert_equal 6, emits[1][2]["val2"] # record
@@ -131,7 +131,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 2, emits.length
     assert_equal 'test', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 5, emits[0][2].length # record length
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record
@@ -140,7 +140,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     assert_equal "xyz", emits[0][2]["mackerel_hostid"] # record
 
     assert_equal 'test', emits[1][0] # tag
-    assert_equal 1407650400, emits[1][1] # time
+    assert_equal 1407650400, emits[1][1].to_i # time
     assert_equal 5, emits[1][2].length # record length
     assert_equal 5, emits[1][2]["val1"] # record
     assert_equal 6, emits[1][2]["val2"] # record
@@ -162,7 +162,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 1, emits.length
     assert_equal 'service', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 5, emits[0][2].length # record length
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record
@@ -185,7 +185,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 1, emits.length
     assert_equal 'mackerel.test', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 5, emits[0][2].length # record length
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record
@@ -208,7 +208,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 1, emits.length
     assert_equal 'mackerel.service', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 5, emits[0][2].length # record length
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record
@@ -231,7 +231,7 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
     emits = d.emits
     assert_equal 1, emits.length
     assert_equal 'mackerel.service.xyz', emits[0][0] # tag
-    assert_equal 1407650400, emits[0][1] # time
+    assert_equal 1407650400, emits[0][1].to_i # time
     assert_equal 4, emits[0][2].length # record length
     assert_equal 1, emits[0][2]["val1"] # record
     assert_equal 2, emits[0][2]["val2"] # record

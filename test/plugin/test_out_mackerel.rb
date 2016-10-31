@@ -88,7 +88,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     type mackerel
     api_key 123456
     service xyz
-    out_keys val1,val2,val3
+    out_keys val1,val2
   ]
 
   CONFIG_SERVICE_REMOVE_PREFIX = %[
@@ -96,7 +96,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     api_key 123456
     service xyz
     remove_prefix
-    out_keys val1,val2,val3
+    out_keys val1,val2
   ]
 
   CONFIG_INVALID_REMOVE_PREFIX = %[
@@ -162,7 +162,8 @@ class MackerelOutputTest < Test::Unit::TestCase
     assert_equal d.instance.instance_variable_get(:@buffer_queue_limit), 4096
 
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
+    new_limit = Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT/100
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), new_limit
 
 end
 
@@ -180,7 +181,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
     d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
     d.emit({'val1' => 9, 'val2' => 10}, t)
@@ -195,7 +196,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -208,7 +209,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2}, t)
     d.run()
   end
@@ -221,7 +222,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -234,7 +235,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
@@ -248,7 +249,7 @@ end
     ])
 
     ENV["TZ"]="Asia/Tokyo"
-    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T')
+    t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
     d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
     d.run()
   end
