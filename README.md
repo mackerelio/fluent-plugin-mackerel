@@ -25,7 +25,7 @@ $ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-mackerel
 This plugin uses mackerel.io's [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0).
 ```
 <match ...>
-  type mackerel
+  @type mackerel
   api_key 123456
   hostid xyz
   metrics_name http_status.${out_key}
@@ -52,7 +52,7 @@ For example, if you have set `out_keys 2xx_count,3xx_count,4xx_count,5xx_count`,
 
 ```
 <match ...>
-  type mackerel
+  @type mackerel
   api_key 123456
   service yourservice
   metrics_name http_status.${out_key}
@@ -63,7 +63,7 @@ For example, if you have set `out_keys 2xx_count,3xx_count,4xx_count,5xx_count`,
 
 ```
 <match mackerel.*>
-  type mackerel
+  @type mackerel
   api_key 123456
   hostid xyz
   metrics_name ${[1]}.${out_key}
@@ -85,7 +85,7 @@ This indicates the value of the `n` th index of the array. By splitting the tag 
 You can also send [service metrics](http://help.mackerel.io/entry/spec/api/v0#service-metric-value-post) as shown.
 ```
 <match ...>
-  type mackerel
+  @type mackerel
   api_key 123456
   service yourservice
   metrics_name http_status.${out_key}
@@ -98,7 +98,7 @@ This option is not availabe when sending host metrics.
 
 ```
 <match ...>
-  type mackerel
+  @type mackerel
   api_key 123456
   service yourservice
   remove_prefix
@@ -123,7 +123,7 @@ From version 0.0.4 and on, metrics_prefix has been removed and metrics_name shou
 Let's say you want to add the hostid to the record with a specific key name...
 ```
 <match ...>
-  type mackerel_hostid_tag
+  @type mackerel_hostid_tag
   add_to record
   key_name mackerel_hostid
 </match>
@@ -133,7 +133,7 @@ As shown above, the key_name field is required. For example if the host_id is "x
 To append the hostid to the tag, you can simply configure "add_to" as "tag" like this.
 ```
 <match ...>
-  type mackerel_hostid_tag
+  @type mackerel_hostid_tag
   add_to tag
 </match>
 ```
@@ -175,7 +175,7 @@ $ bundle exec rake release
 For debugging purposes, you can change the Mackerel endpoint with an `origin` parameter like this.
 ```
 <match ...>
-  type mackerel
+  @type mackerel
   api_key 123456
   hostid xyz
   metrics_name http_status.${out_key}
