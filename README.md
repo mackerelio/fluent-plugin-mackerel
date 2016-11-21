@@ -22,7 +22,7 @@ $ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-mackerel
 
 ### MackerelOutput
 
-This plugin uses mackerel.io's [APIv0](http://help-ja.mackerel.io/entry/spec/api/v0).
+This plugin uses mackerel.io's [APIv0](https://mackerel.io/api-docs/).
 ```
 <match ...>
   @type mackerel
