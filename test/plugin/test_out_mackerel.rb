@@ -141,7 +141,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     }
 
     d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
-    assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+    assert_equal d.instance.instance_variable_get(:@flush_interval), 1
 
     d = create_driver(CONFIG_ORIGIN)
     assert_equal d.instance.instance_variable_get(:@origin), 'example.domain'

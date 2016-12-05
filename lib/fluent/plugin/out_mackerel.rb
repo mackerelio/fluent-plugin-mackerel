@@ -46,8 +46,7 @@ module Fluent
       end
 
       if @flush_interval < 60
-        log.info("flush_interval less than 60s is not allowed and overwritten to 60s")
-        @flush_interval = 60
+        log.warn("flush_interval less than 60s is not recommended")
       end
 
       unless @hostid_path.nil?
