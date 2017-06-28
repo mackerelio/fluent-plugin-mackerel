@@ -114,8 +114,8 @@ class MackerelOutputTest < Test::Unit::TestCase
     out_keys val1,val2,val3
   ]
 
-  def create_driver(conf = CONFIG, tag='test')
-    Fluent::Test::BufferedOutputTestDriver.new(Fluent::MackerelOutput, tag).configure(conf)
+  def create_driver(conf = CONFIG)
+    Fluent::Test::Driver::Output.new(Fluent::Plugin::MackerelOutput).configure(conf)
   end
 
   def test_configure
@@ -140,8 +140,9 @@ class MackerelOutputTest < Test::Unit::TestCase
       d = create_driver(CONFIG_INVALID_REMOVE_PREFIX)
     }
 
-    d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
-    assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+    assert_raise(Fluent::ConfigError) {
+      d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
+    }
 
     d = create_driver(CONFIG_ORIGIN)
     assert_equal d.instance.instance_variable_get(:@origin), 'example.domain'
@@ -151,19 +152,19 @@ class MackerelOutputTest < Test::Unit::TestCase
     assert_equal d.instance.instance_variable_get(:@hostid), 'xyz'
     assert_equal d.instance.instance_variable_get(:@metrics_name), 'service.${out_key}'
     assert_equal d.instance.instance_variable_get(:@out_keys), ['val1','val2','val3']
-    assert_equal d.instance.instance_variable_get(:@flush_interval), 60
+    buffer = d.instance.instance_variable_get(:@buffer_config)
+    assert_equal buffer.flush_interval, 60
 
     d = create_driver(CONFIG_OUT_KEY_PATTERN)
     assert_match d.instance.instance_variable_get(:@out_key_pattern), "val1"
     assert_no_match d.instance.instance_variable_get(:@out_key_pattern), "foo"
 
     d = create_driver(CONFIG_BUFFER_LIMIT_DEFAULT)
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::Plugin::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
     assert_equal d.instance.instance_variable_get(:@buffer_queue_limit), 4096
 
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
-    new_limit = Fluent::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT/100
-    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), new_limit
+    assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::Plugin::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
 
 end
 
@@ -182,10 +183,11 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4}, t)
-    d.emit({'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8}, t)
-    d.emit({'val1' => 9, 'val2' => 10}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'val3' => 3, 'val4' => 4})
+      d.feed(t, {'val1' => 5, 'val2' => 6, 'val3' => 7, 'val4' => 8})
+      d.feed(t, {'val1' => 9, 'val2' => 10})
+    end
   end
 
   def test_write_pattern
@@ -197,12 +199,13 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_write_issue4
-    d = create_driver(CONFIG_FOR_ISSUE_4, tag='test.status')
+    d = create_driver(CONFIG_FOR_ISSUE_4)
     mock(d.instance.mackerel).post_metrics([
       {"hostId"=>"xyz", "value"=>1.0, "time"=>1399997498, "name"=>"custom.a-status-b.val1"},
       {"hostId"=>"xyz", "value"=>2.0, "time"=>1399997498, "name"=>"custom.a-status-b.val2"},
@@ -210,8 +213,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2}, t)
-    d.run()
+    d.run(default_tag: 'test.status') do
+      d.feed(t, {'val1' => 1, 'val2' => 2})
+    end
   end
 
   def test_service
@@ -223,8 +227,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_service_remove_prefix
@@ -236,8 +241,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_service_use_zero
@@ -250,8 +256,9 @@ end
 
     ENV["TZ"]="Asia/Tokyo"
     t = Time.strptime('2014-05-14 01:11:38', '%Y-%m-%d %T').to_i
-    d.emit({'val1' => 1, 'val2' => 2, 'foo' => 3}, t)
-    d.run()
+    d.run(default_tag: 'test') do
+      d.feed(t, {'val1' => 1, 'val2' => 2, 'foo' => 3})
+    end
   end
 
   def test_name_processor
@@ -282,7 +289,7 @@ end
         metrics_name #{obj[:metrics_name]}
         out_keys val1,val2
       ]
-      d = create_driver(test_config, tag='test.status')
+      d = create_driver(test_config)
       name_processor = d.instance.instance_variable_get(:@name_processor)
       actual = name_processor.map{ |p| p.call(:out_key => 'val1', :tokens => ['test', 'status']) }.join('.')
       assert_equal obj[:expected], actual
