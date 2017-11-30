@@ -1,4 +1,4 @@
-require 'mackerel/client'
+require 'mackerel-client'
 
 module Fluent::Plugin
   class MackerelOutput < Output
