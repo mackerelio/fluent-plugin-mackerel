@@ -160,11 +160,11 @@ module Fluent::Plugin
         end
       end
 
-      send(metrics) unless metrics.empty?
+      send_metrics(metrics) unless metrics.empty?
       metrics.clear
     end
 
-    def send(metrics)
+    def send_metrics(metrics)
       log.debug("out_mackerel: #{metrics}")
       begin
         if @hostid
