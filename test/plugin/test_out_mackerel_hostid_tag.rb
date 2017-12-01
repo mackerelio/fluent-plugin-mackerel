@@ -69,11 +69,11 @@ class MackerelHostidTagOutputTest < Test::Unit::TestCase
   def test_configure
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver('')
+      create_driver('')
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_RECORD_NO_KEY_NAME)
+      create_driver(CONFIG_RECORD_NO_KEY_NAME)
     }
 
     d = create_driver()
