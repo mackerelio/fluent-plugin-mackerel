@@ -166,7 +166,7 @@ class MackerelOutputTest < Test::Unit::TestCase
     d = create_driver(CONFIG_BUFFER_LIMIT_IGNORE)
     assert_equal d.instance.instance_variable_get(:@buffer_chunk_limit), Fluent::Plugin::MackerelOutput::MAX_BUFFER_CHUNK_LIMIT
 
-end
+  end
 
   def test_write
     d = create_driver()
