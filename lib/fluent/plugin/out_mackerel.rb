@@ -95,6 +95,8 @@ module Fluent::Plugin
             }
           }
         }
+      else
+        @name_processor = nil
       end
     end
 

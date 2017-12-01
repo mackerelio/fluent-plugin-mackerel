@@ -33,7 +33,7 @@ module Fluent
         @removed_prefix_string = @remove_prefix + '.'
         @removed_length = @removed_prefix_string.length
       end
-      @added_prefix_string = @add_prefix + '.' unless @add_prefix.nil?
+      @added_prefix_string = @add_prefix.nil? ? nil : @add_prefix + '.'
     end
 
     def emit(tag, es, chain)
