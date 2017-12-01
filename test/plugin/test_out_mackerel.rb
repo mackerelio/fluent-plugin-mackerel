@@ -121,27 +121,27 @@ class MackerelOutputTest < Test::Unit::TestCase
   def test_configure
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver('')
+      create_driver('')
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_NOHOST)
+      create_driver(CONFIG_NOHOST)
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_BLANK_METRICS)
+      create_driver(CONFIG_BLANK_METRICS)
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_NO_OUT_KEYS)
+      create_driver(CONFIG_NO_OUT_KEYS)
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_INVALID_REMOVE_PREFIX)
+      create_driver(CONFIG_INVALID_REMOVE_PREFIX)
     }
 
     assert_raise(Fluent::ConfigError) {
-      d = create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
+      create_driver(CONFIG_SMALL_FLUSH_INTERVAL)
     }
 
     d = create_driver(CONFIG_ORIGIN)
