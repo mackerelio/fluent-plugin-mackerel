@@ -1,0 +1,22 @@
+name: ci
+on: 
+  push:
+  pull_request:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['2.7', '3.0', '3.1']
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - uses: actions/checkout@v3
+    - run: gem install bundler:1.17.3
+    - run: bundle _1.17.3_ install
+    - run: VERBOSE=1 bundle exec rake test
+
